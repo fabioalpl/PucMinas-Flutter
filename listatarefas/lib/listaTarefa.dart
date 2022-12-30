@@ -2,18 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:listatarefas/tarefa.dart';
 
 class ListaTarefa extends StatefulWidget {
-//const ListaTarefa({super.key});
+  const ListaTarefa({
+    super.key,
+    required this.deletaTarefa,
+    required this.tarefas,
+  });
 
+  final Function deletaTarefa;
   final List<Tarefa> tarefas;
-  ListaTarefa(this.tarefas);
 
   @override
-  State<ListaTarefa> createState() => _ListaTarefaState(this.tarefas);
+  State<ListaTarefa> createState() =>
+      _ListaTarefaState(this.tarefas, this.deletaTarefa);
 }
 
 class _ListaTarefaState extends State<ListaTarefa> {
-  _ListaTarefaState(this.tarefas);
+  _ListaTarefaState(this.tarefas, this.deletaTarefa);
 
+  final Function deletaTarefa;
   final List<Tarefa> tarefas;
   @override
   Widget build(BuildContext context) {
@@ -56,7 +62,7 @@ class _ListaTarefaState extends State<ListaTarefa> {
                     ),
                     IconButton(
                       onPressed: () {
-                        //deleteGasto(gasto.id);
+                        deletaTarefa(tarefa.id);
                       },
                       icon: Icon(
                         Icons.delete,

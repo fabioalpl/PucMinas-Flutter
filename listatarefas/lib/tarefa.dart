@@ -10,10 +10,14 @@ class Tarefa {
   });
 
   Map<String, dynamic> toMap() {
-    return {
+    var map = <String, dynamic>{
       'id': id,
       'titulo': titulo,
       'finalizada': finalizada ? 1 : 0,
     };
+
+    if (id != null) map['id'] = id;
+
+    return map;
   }
 }

@@ -25,19 +25,9 @@ class BDConnection {
     return _bd!;
   }
 
-  /*Future<void> _criarBD(Database bd, int version) async {
-    await bd.execute('''
-    CREATE TABLE tarefa(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      titulo TEXT,
-      finalizada INTEGER
-      )
-      ''');
-  }*/
-
-  Future<void> criaTarefa(Tarefa tarefa) async {
+  Future<int> criaTarefa(Tarefa tarefa) async {
     final bd = await database;
-    await bd.insert(
+    return await bd.insert(
       'tarefa',
       tarefa.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
@@ -46,7 +36,7 @@ class BDConnection {
 
   Future<void> deletaTarefa(Tarefa tarefa) async {
     final db = await database;
-    await db.delete('tarefa', where: 'id === ?');
+    await db.delete('tarefa', where: 'id == ?');
   }
 
   Future<List<Tarefa>> listaTarefa() async {
@@ -54,7 +44,7 @@ class BDConnection {
     List<Map<String, dynamic>> items =
         await bd.query('tarefa', orderBy: 'id DESC');
 
-    return List.generate(
+    return await List.generate(
       items.length,
       (i) => Tarefa(
         id: items[i]['id'],

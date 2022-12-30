@@ -9,15 +9,15 @@ class ControllerTarefa extends StatefulWidget {
 
   @override
   State<ControllerTarefa> createState() => _ControllerTarefaState();
-
-  void criaTarefa(String text, bool bool) {}
 }
 
 class _ControllerTarefaState extends State<ControllerTarefa> {
-  final List<Tarefa> tarefas = [
+  /*final List<Tarefa> tarefas = [
     Tarefa(id: 1, titulo: "Café", finalizada: true),
     Tarefa(id: 2, titulo: "Pão de Queijo", finalizada: false)
-  ];
+  ];*/
+
+  late final List<Tarefa> tarefas = [];
 
   var _tituloController = TextEditingController();
   var controller = ControllerTarefa();
@@ -25,7 +25,8 @@ class _ControllerTarefaState extends State<ControllerTarefa> {
 
   void criaTarefa(String titulo, bool check) async {
     final novaTarefa = Tarefa(titulo: titulo, finalizada: check);
-    await db.criaTarefa(novaTarefa);
+    int id = await db.criaTarefa(novaTarefa);
+    novaTarefa.id = id;
     setState(
       () {
         tarefas.add(novaTarefa);
@@ -33,13 +34,53 @@ class _ControllerTarefaState extends State<ControllerTarefa> {
     );
   }
 
-  void deletaTarefa(String id) async {
-    //await db.deletaTarefa(tarefa);
+  void deletaTarefa(int id) async {
+    await db.deletaTarefa(tarefas.firstWhere((tarefa) => tarefa.id == id));
     setState(
       () {
         tarefas.removeWhere((tarefa) => tarefa.id == id);
       },
     );
+  }
+
+  Future<void> populaListaTarefas() async {
+    Future<List<Tarefa>> listFuture;
+    List<Tarefa> list = [];
+
+    list = await db.listaTarefa();
+    setState(() {
+      list.forEach((item) => tarefas.add(item));
+    });
+  }
+
+  _showDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Incluir Tarefa'),
+          content: TextField(
+            controller: _tituloController,
+            decoration: InputDecoration(hintText: "Título"),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                criaTarefa(_tituloController.text, false);
+                Navigator.pop(context);
+              },
+              child: Text("Incluir"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    populaListaTarefas();
   }
 
   @override
@@ -50,31 +91,13 @@ class _ControllerTarefaState extends State<ControllerTarefa> {
           child: Text('Lista de Compras'),
         ),
       ),
-      body: ListaTarefa(tarefas),
-      //CardTarefa(criaTarefa),
-
+      body: ListaTarefa(
+        tarefas: tarefas,
+        deletaTarefa: deletaTarefa,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Incluir Tarefa'),
-                content: TextField(
-                  controller: _tituloController,
-                  decoration: InputDecoration(hintText: "Título"),
-                ),
-                actions: [
-                  ElevatedButton(
-                    onPressed: () {
-                      criaTarefa(_tituloController.text, false);
-                    },
-                    child: Text("Incluir"),
-                  ),
-                ],
-              );
-            },
-          );
+          _showDialog();
         },
         tooltip: 'Nova Tarefa',
         child: const Icon(Icons.add),
